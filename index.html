@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>工程報價單</title>
     <style>
-        body { font-family: '微軟正黑體', sans-serif; background-color: #f4f4f4; padding: 20px; }
+        body { font-family: '微軟正黑體', sans-serif; background-color: #f4f4f4; padding: 20px; margin: 0; }
         .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 40px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
         
         /* 公司名稱與聯絡人 */
@@ -13,7 +13,7 @@
         .company-info span { font-size: 24px; font-weight: normal; margin-left: 15px; color: #555; }
         
         .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
-        .header h1 { margin: 0; color: #333; font-size: 36px; }
+        .header h1 { margin: 0; color: #333; font-size: 36px; line-height: 1.2; }
         .quote-info { text-align: right; font-size: 0.9em; color: #555; }
         
         /* 客戶資訊欄位 */
@@ -21,39 +21,75 @@
         .info-section div { margin-bottom: 15px; width: 48%; }
         
         label { font-weight: bold; }
-        input[type="text"], input[type="number"], input[type="date"] { padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; margin-top: 5px; }
+        input[type="text"], input[type="number"], input[type="date"] { padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; margin-top: 5px; font-size: 16px; }
         
-        /* 表格設定 */
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
-        th { background-color: #f8f8f8; }
-        .item-input { width: 95%; }
-        .num-input { width: 90%; text-align: right; }
+        /* 表格設定與滑動區塊 */
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; } /* 設定最小寬度，確保手機上不會縮太小 */
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+        th { background-color: #f8f8f8; white-space: nowrap; }
+        .item-input { width: 95%; min-width: 180px; }
+        .num-input { width: 90%; text-align: right; min-width: 60px; }
         
         /* 按鈕設定 */
-        .btn { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; color: white; }
+        .btn { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; color: white; font-size: 16px; }
         .btn-add { background-color: #28a745; margin-bottom: 15px; }
-        .btn-remove { background-color: #dc3545; padding: 5px 10px; }
-        .btn-print { background-color: #007bff; font-size: 16px; width: 100%; padding: 15px; margin-top: 30px; }
+        .btn-remove { background-color: #dc3545; padding: 8px 12px; }
+        .btn-print { background-color: #007bff; font-size: 18px; font-weight: bold; width: 100%; padding: 15px; margin-top: 30px; }
         
         /* 總計與條件 */
         .total-section { text-align: right; font-size: 1.4em; font-weight: bold; margin-bottom: 20px; padding: 10px; background-color: #fcfcfc; border: 1px solid #eee; }
         .terms-section { font-size: 0.9em; color: #444; line-height: 1.6; border-top: 1px dashed #ccc; padding-top: 20px; margin-bottom: 30px; }
-        textarea { width: 100%; height: 90px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; resize: vertical; box-sizing: border-box; margin-top: 5px; }
+        textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; resize: vertical; box-sizing: border-box; margin-top: 5px; font-size: 16px; }
         
-        /* 新增：傳統蓋章與簽名區塊 */
+        /* 傳統蓋章與簽名區塊 */
         .signature-section { display: flex; justify-content: space-between; margin-top: 20px; page-break-inside: avoid; }
         .signature-box { width: 45%; border: 1px solid #666; height: 160px; position: relative; padding: 10px; box-sizing: border-box; background-color: #fff; }
         .signature-box .title { font-weight: bold; font-size: 1.1em; border-bottom: 1px dashed #ccc; padding-bottom: 8px; margin-bottom: 10px; text-align: center; color: #333; }
         .signature-box .date-line { position: absolute; bottom: 10px; right: 15px; font-size: 0.9em; color: #555; }
         
-        /* 列印 (存成PDF) 時的畫面設定 */
+        /* ========================================= */
+        /* 手機螢幕專屬排版 (解決字太小、擠在一起的問題) */
+        /* ========================================= */
+        @media screen and (max-width: 768px) {
+            body { padding: 10px; }
+            .container { padding: 20px 15px; }
+            .company-info { font-size: 26px; text-align: center; }
+            .company-info span { display: block; margin-left: 0; margin-top: 5px; font-size: 18px; }
+            
+            .header { flex-direction: column; align-items: flex-start; border-bottom: none; }
+            .header h1 { font-size: 28px; margin-bottom: 15px; text-align: center; width: 100%; border-bottom: 2px solid #333; padding-bottom: 10px; }
+            .quote-info { text-align: left; width: 100%; }
+            .quote-info input { width: 100% !important; margin-bottom: 10px; }
+            
+            .info-section div { width: 100%; margin-bottom: 10px; }
+            
+            .signature-section { flex-direction: column; }
+            .signature-box { width: 100%; margin-bottom: 15px; }
+            
+            /* 提示手機用戶可以滑動表格 */
+            .table-responsive::before {
+                content: "👉 提示：表格可左右滑動輸入資料";
+                display: block;
+                font-size: 13px;
+                color: #e83e8c;
+                margin-bottom: 5px;
+                font-weight: bold;
+            }
+        }
+
+        /* ========================================= */
+        /* 列印與 PDF 輸出專屬排版 (保持完美的 A4 格式) */
+        /* ========================================= */
         @media print {
             body { background: white; padding: 0; }
             .container { box-shadow: none; border: none; max-width: 100%; padding: 0; }
             .no-print { display: none !important; }
-            input, textarea { border: none; background: transparent; pointer-events: none; resize: none; padding: 0; margin: 0; color: #000; }
-            /* 隱藏輸入框的底線，看起來更像傳統紙本 */
+            /* 隱藏提示文字 */
+            .table-responsive::before { display: none; }
+            .table-responsive { overflow: visible; margin-bottom: 20px; }
+            table { min-width: 100%; }
+            input, textarea { border: none; background: transparent; pointer-events: none; resize: none; padding: 0; margin: 0; color: #000; font-size: inherit; }
             input[type="text"], input[type="date"] { border-bottom: 1px solid transparent; }
         }
     </style>
@@ -92,26 +128,28 @@
         </div>
     </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th style="width: 45%;">工程 / 項目說明</th>
-                <th style="width: 15%;">數量</th>
-                <th style="width: 15%;">單價</th>
-                <th style="width: 15%;">小計</th>
-                <th style="width: 10%;" class="no-print">操作</th>
-            </tr>
-        </thead>
-        <tbody id="itemTableBody">
-            <tr>
-                <td><input type="text" class="item-input" placeholder="請輸入項目名稱與規格"></td>
-                <td><input type="number" class="num-input qty" value="1" min="1" onchange="calculate()"></td>
-                <td><input type="number" class="num-input price" value="0" min="0" onchange="calculate()"></td>
-                <td class="subtotal">0</td>
-                <td class="no-print"><button class="btn btn-remove" onclick="removeRow(this)">刪除</button></td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 45%;">工程 / 項目說明</th>
+                    <th style="width: 15%;">數量</th>
+                    <th style="width: 15%;">單價</th>
+                    <th style="width: 15%;">小計</th>
+                    <th style="width: 10%;" class="no-print">操作</th>
+                </tr>
+            </thead>
+            <tbody id="itemTableBody">
+                <tr>
+                    <td><input type="text" class="item-input" placeholder="請輸入項目名稱與規格"></td>
+                    <td><input type="number" class="num-input qty" value="1" min="1" onchange="calculate()"></td>
+                    <td><input type="number" class="num-input price" value="0" min="0" onchange="calculate()"></td>
+                    <td class="subtotal">0</td>
+                    <td class="no-print"><button class="btn btn-remove" onclick="removeRow(this)">刪除</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
     <button class="btn btn-add no-print" onclick="addRow()">+ 新增工程項目</button>
 
@@ -131,8 +169,7 @@
     <div class="signature-section">
         <div class="signature-box">
             <div class="title">良品金屬工程行 簽章</div>
-            </div>
-        
+        </div>
         <div class="signature-box">
             <div class="title">客戶確認委託 簽名 / 蓋章</div>
             <div class="date-line">日期：　　年　　月　　日</div>
@@ -143,14 +180,11 @@
 </div>
 
 <script>
-    // 自動生成日期與報價單號
     function initDateAndQuoteNo() {
         const today = new Date();
-        
         const yyyy = today.getFullYear();
         const mm = String(today.getMonth() + 1).padStart(2, '0');
         const dd = String(today.getDate()).padStart(2, '0');
-        
         const dateString = `${yyyy}-${mm}-${dd}`;
         document.getElementById('quoteDate').value = dateString;
         
