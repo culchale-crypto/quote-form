@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工程報價單</title>
+    <style>
+        body { font-family: '微軟正黑體', sans-serif; background-color: #f4f4f4; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 40px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        
+        /* 公司名稱與聯絡人 */
+        .company-info { font-size: 36px; font-weight: bold; color: #333; margin-bottom: 5px; }
+        .company-info span { font-size: 24px; font-weight: normal; margin-left: 15px; color: #555; }
+        
+        .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+        .header h1 { margin: 0; color: #333; font-size: 36px; }
+        .quote-info { text-align: right; font-size: 0.9em; color: #555; }
+        
+        /* 客戶資訊欄位 */
+        .info-section { display: flex; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; }
+        .info-section div { margin-bottom: 15px; width: 48%; }
+        
+        label { font-weight: bold; }
+        input[type="text"], input[type="number"], input[type="date"] { padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; margin-top: 5px; }
+        
+        /* 表格設定 */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
+        th { background-color: #f8f8f8; }
+        .item-input { width: 95%; }
+        .num-input { width: 90%; text-align: right; }
+        
+        /* 按鈕設定 */
+        .btn { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; color: white; }
+        .btn-add { background-color: #28a745; margin-bottom: 15px; }
+        .btn-remove { background-color: #dc3545; padding: 5px 10px; }
+        .btn-print { background-color: #007bff; font-size: 16px; width: 100%; padding: 15px; margin-top: 30px; }
+        
+        /* 總計與條件 */
+        .total-section { text-align: right; font-size: 1.4em; font-weight: bold; margin-bottom: 20px; padding: 10px; background-color: #fcfcfc; border: 1px solid #eee; }
+        .terms-section { font-size: 0.9em; color: #444; line-height: 1.6; border-top: 1px dashed #ccc; padding-top: 20px; margin-bottom: 30px; }
+        textarea { width: 100%; height: 90px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; resize: vertical; box-sizing: border-box; margin-top: 5px; }
+        
+        /* 新增：傳統蓋章與簽名區塊 */
+        .signature-section { display: flex; justify-content: space-between; margin-top: 20px; page-break-inside: avoid; }
+        .signature-box { width: 45%; border: 1px solid #666; height: 160px; position: relative; padding: 10px; box-sizing: border-box; background-color: #fff; }
+        .signature-box .title { font-weight: bold; font-size: 1.1em; border-bottom: 1px dashed #ccc; padding-bottom: 8px; margin-bottom: 10px; text-align: center; color: #333; }
+        .signature-box .date-line { position: absolute; bottom: 10px; right: 15px; font-size: 0.9em; color: #555; }
+        
+        /* 列印 (存成PDF) 時的畫面設定 */
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; border: none; max-width: 100%; padding: 0; }
+            .no-print { display: none !important; }
+            input, textarea { border: none; background: transparent; pointer-events: none; resize: none; padding: 0; margin: 0; color: #000; }
+            /* 隱藏輸入框的底線，看起來更像傳統紙本 */
+            input[type="text"], input[type="date"] { border-bottom: 1px solid transparent; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="company-info">
+        良品金屬工程行 <span>張揚楷 0912398918</span>
+    </div>
+
+    <div class="header">
+        <h1>工程報價單</h1>
+        <div class="quote-info">
+            報價單號：<input type="text" id="quoteNo" style="width: 200px; display: inline-block; margin: 0;"><br>
+            報價日期：<input type="date" id="quoteDate" style="width: 200px; display: inline-block; margin-top: 5px;">
+        </div>
+    </div>
+
+    <div class="info-section">
+        <div>
+            <label>客戶名稱：</label>
+            <input type="text" id="customerName" placeholder="請輸入客戶名稱">
+        </div>
+        <div>
+            <label>聯絡電話：</label>
+            <input type="text" id="customerPhone" placeholder="請輸入聯絡電話">
+        </div>
+        <div>
+            <label>工程地點：</label>
+            <input type="text" id="location" placeholder="請輸入施工地址">
+        </div>
+        <div>
+            <label>備註：</label>
+            <input type="text" id="remarks" placeholder="請輸入備註說明">
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 45%;">工程 / 項目說明</th>
+                <th style="width: 15%;">數量</th>
+                <th style="width: 15%;">單價</th>
+                <th style="width: 15%;">小計</th>
+                <th style="width: 10%;" class="no-print">操作</th>
+            </tr>
+        </thead>
+        <tbody id="itemTableBody">
+            <tr>
+                <td><input type="text" class="item-input" placeholder="請輸入項目名稱與規格"></td>
+                <td><input type="number" class="num-input qty" value="1" min="1" onchange="calculate()"></td>
+                <td><input type="number" class="num-input price" value="0" min="0" onchange="calculate()"></td>
+                <td class="subtotal">0</td>
+                <td class="no-print"><button class="btn btn-remove" onclick="removeRow(this)">刪除</button></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <button class="btn btn-add no-print" onclick="addRow()">+ 新增工程項目</button>
+
+    <div class="total-section">
+        總計金額：NT$ <span id="grandTotal">0</span>
+    </div>
+
+    <div class="terms-section">
+        <label>報價單效期與交易條件：</label>
+        <textarea id="terms">
+1. 本報價單自報價日期起 15 天內有效。
+2. 付款方式：簽約確認後收取 30% 訂金，工程完工驗收後收取 70% 尾款。
+3. 確認委託：請於下方「客戶確認處」簽名或蓋章後回傳，即視為正式委託施工。
+4. 本報價不含廢棄物清運及稅金（若需發票稅外加 5%）。</textarea>
+    </div>
+
+    <div class="signature-section">
+        <div class="signature-box">
+            <div class="title">良品金屬工程行 簽章</div>
+            </div>
+        
+        <div class="signature-box">
+            <div class="title">客戶確認委託 簽名 / 蓋章</div>
+            <div class="date-line">日期：　　年　　月　　日</div>
+        </div>
+    </div>
+
+    <button class="btn btn-print no-print" onclick="window.print()">🖨️ 儲存為 PDF 報價單</button>
+</div>
+
+<script>
+    // 自動生成日期與報價單號
+    function initDateAndQuoteNo() {
+        const today = new Date();
+        
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        
+        const dateString = `${yyyy}-${mm}-${dd}`;
+        document.getElementById('quoteDate').value = dateString;
+        
+        const randomNum = Math.floor(1000 + Math.random() * 9000);
+        const quoteNo = `${yyyy}${mm}${dd}-${randomNum}`;
+        document.getElementById('quoteNo').value = quoteNo;
+    }
+
+    window.onload = initDateAndQuoteNo;
+
+    function addRow() {
+        const tbody = document.getElementById('itemTableBody');
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><input type="text" class="item-input" placeholder="請輸入項目名稱與規格"></td>
+            <td><input type="number" class="num-input qty" value="1" min="1" onchange="calculate()"></td>
+            <td><input type="number" class="num-input price" value="0" min="0" onchange="calculate()"></td>
+            <td class="subtotal">0</td>
+            <td class="no-print"><button class="btn btn-remove" onclick="removeRow(this)">刪除</button></td>
+        `;
+        tbody.appendChild(tr);
+    }
+
+    function removeRow(btn) {
+        btn.closest('tr').remove();
+        calculate();
+    }
+
+    function calculate() {
+        const rows = document.querySelectorAll('#itemTableBody tr');
+        let grandTotal = 0;
+        rows.forEach(row => {
+            const qty = row.querySelector('.qty').value || 0;
+            const price = row.querySelector('.price').value || 0;
+            const subtotal = qty * price;
+            row.querySelector('.subtotal').innerText = subtotal.toLocaleString();
+            grandTotal += subtotal;
+        });
+        document.getElementById('grandTotal').innerText = grandTotal.toLocaleString();
+    }
+</script>
+
+</body>
+</html>
