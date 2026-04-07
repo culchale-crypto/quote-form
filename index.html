@@ -25,7 +25,7 @@
         
         /* 表格設定與滑動區塊 */
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; } /* 設定最小寬度，確保手機上不會縮太小 */
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
         th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
         th { background-color: #f8f8f8; white-space: nowrap; }
         .item-input { width: 95%; min-width: 180px; }
@@ -67,28 +67,38 @@
             .signature-section { flex-direction: column; }
             .signature-box { width: 100%; margin-bottom: 15px; }
             
-            /* 提示手機用戶可以滑動表格 */
             .table-responsive::before {
                 content: "👉 提示：表格可左右滑動輸入資料";
-                display: block;
-                font-size: 13px;
-                color: #e83e8c;
-                margin-bottom: 5px;
-                font-weight: bold;
+                display: block; font-size: 13px; color: #e83e8c; margin-bottom: 5px; font-weight: bold;
             }
         }
 
         /* ========================================= */
-        /* 列印與 PDF 輸出專屬排版 (保持完美的 A4 格式) */
+        /* 列印與 PDF 輸出專屬排版 (強制縮減留白，塞進一頁) */
         /* ========================================= */
+        @page { size: A4 portrait; margin: 1cm; } /* 強制手機瀏覽器把邊界縮到最小(1公分) */
+        
         @media print {
-            body { background: white; padding: 0; }
+            body { background: white; padding: 0; font-size: 14px; }
             .container { box-shadow: none; border: none; max-width: 100%; padding: 0; }
             .no-print { display: none !important; }
-            /* 隱藏提示文字 */
             .table-responsive::before { display: none; }
-            .table-responsive { overflow: visible; margin-bottom: 20px; }
-            table { min-width: 100%; }
+            .table-responsive { overflow: visible; margin-bottom: 10px; }
+            
+            /* 縮小區塊之間的空白與高度 */
+            table { min-width: 100%; margin-bottom: 10px; }
+            th, td { padding: 6px; } /* 表格變扁一點 */
+            .header { margin-bottom: 15px; padding-bottom: 5px; }
+            .info-section { margin-bottom: 10px; }
+            .info-section div { margin-bottom: 5px; }
+            .total-section { margin-bottom: 10px; padding: 5px; }
+            .terms-section { margin-bottom: 10px; padding-top: 10px; }
+            
+            /* 強制縮小大方塊的高度 */
+            textarea { height: 75px !important; } /* 條款區塊變矮 */
+            .signature-box { height: 110px !important; } /* 簽名區塊變矮 */
+            
+            /* 讓輸入框變成純文字顯示 */
             input, textarea { border: none; background: transparent; pointer-events: none; resize: none; padding: 0; margin: 0; color: #000; font-size: inherit; }
             input[type="text"], input[type="date"] { border-bottom: 1px solid transparent; }
         }
